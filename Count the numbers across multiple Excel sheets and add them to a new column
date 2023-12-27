@@ -1,0 +1,42 @@
+import pandas as pd
+
+# Read the Excel file
+file_path = 'Input path with filename.xls'
+xls = pd.ExcelFile(file_path)
+
+# Store modified DataFrames for each sheet
+modified_dfs = {}
+
+# Iterate through each sheet
+for sheet_name in xls.sheet_names:
+    # Read each sheet into a DataFrame
+    df = pd.read_excel(file_path, sheet_name=sheet_name)
+
+    # Define the range of columns (skipping the first column 'A')
+    columns_to_count = df.columns[1:]  # Skip the first column
+
+    # Function to count zeros and non-zeros in each row
+    def count_zeros(row):
+        zero_count = row[columns_to_count].eq(0).sum()
+        non_zero_count = row[columns_to_count].gt(0).sum()
+        return zero_count, non_zero_count
+
+    # Apply the counting function row-wise
+    counts = df.apply(lambda row: count_zeros(row), axis=1)
+
+    # Separate zero counts and non-zero counts
+    zero_counts = [x[0] for x in counts]
+    non_zero_counts = [x[1] for x in counts]
+
+    # Add the counts as new columns at the end of the DataFrame
+    df['Non_Zero_Count'] = non_zero_counts
+    df['Zero_Count'] = zero_counts
+
+    # Store the modified DataFrame for this sheet
+    modified_dfs[sheet_name] = df
+
+# Save the modified DataFrames to a new Excel file
+output_file = 'Ouput path with filename.xlsx'
+with pd.ExcelWriter(output_file) as writer:
+    for sheet_name, df in modified_dfs.items():
+        df.to_excel(writer, sheet_name=sheet_name, index=False)
