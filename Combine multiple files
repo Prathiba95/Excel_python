@@ -1,0 +1,18 @@
+import os
+import glob
+import pandas as pd
+
+# Path to the directory containing the CSV files
+path = 'Path to directory of input file'
+
+# Get a list of all CSV files in the directory
+all_files = glob.glob(os.path.join(path, "*.csv"))
+
+# Combine all CSV files into a single DataFrame
+df_combined = pd.concat((pd.read_csv(f) for f in all_files))
+
+# Save the combined DataFrame to a CSV file
+df_combined.to_csv('Path to directory of output file.csv', index=False)
+
+# Display a message indicating that the files were combined
+print("CSV files combined into combined.csv")
